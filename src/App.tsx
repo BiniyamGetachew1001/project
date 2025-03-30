@@ -11,6 +11,8 @@ import SettingsPage from './pages/SettingsPage';
 import ReadingPage from './pages/ReadingPage';
 import AccountPage from './pages/AccountPage';
 import OfflineLibraryPage from './pages/OfflineLibraryPage';
+import BlogPage from './pages/BlogPage';
+import BlogPostPage from './pages/BlogPostPage';
 import { BookmarkProvider } from './contexts/BookmarkContext';
 import './index.css';
 
@@ -27,6 +29,8 @@ const App = () => {
             <Route path="/books/:id" element={<BookDetailPage />} />
             <Route path="/reading/:id" element={<ReadingPage />} />
             <Route path="/business-plans" element={<BusinessPlansPage />} />
+            <Route path="/blog" element={<BlogPage />} />
+            <Route path="/blog/:id" element={<BlogPostPage />} />
             <Route path="/bookmarks" element={<BookmarksPage />} />
             <Route path="/settings" element={<SettingsPage />} />
             <Route path="/account" element={<AccountPage />} />
