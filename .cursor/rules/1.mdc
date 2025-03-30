@@ -1,0 +1,235 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+
+# Your rule content
+
+- You can @ files here
+- You can use markdown but dont have to
+
+# Your rule content
+
+- You can @ files here
+- You can use markdown but dont have to
+---
+description: Project rules for Vue 3/Nuxt 3 application with Supabase integration
+globs: ["**/*.{vue,ts,js}"]
+alwaysApply: true
+---
+
+# Project Rules
+
+## Technology Stack
+- Vue 3 with Composition API
+- Nuxt 3
+- TypeScript
+- TailwindCSS
+- DaisyUI
+- Supabase (JS client)
+- Imagekit for image storage
+
+## Project Structure
+- Components: `components/`
+- Pages: `pages/`
+- API Endpoints: `server/api/`
+- Composables: `composables/`
+- Types: `types/`
+- Assets: `assets/`
+  - Icons: `assets/icons/`
+  - Images: `assets/img/`
+
+## Code Style
+- Use Composition API exclusively
+- Early returns for better readability
+- Tailwind classes for all styling (no CSS/tags)
+- DaisyUI components for UI elements
+- Descriptive variable/function names
+- Event handlers prefixed with "handle" (e.g., handleClick, handleKeyDown)
+- No imports needed for Vue composables (ref, onMounted, computed) in Nuxt 3
+
+## Component Guidelines
+- Use TheJsonPretty.vue for JSON data display
+- Implement accessibility features:
+  - tabindex="0"
+  - aria-label
+  - on:click
+  - on:keydown
+- Single responsibility principle
+- Proper TypeScript typing for props
+
+## Icons
+- Use custom icons from assets/icons/
+- Default placeholder: assets/icons/bell.svg
+- Example implementation:
+```vue
+<button class="btn admin_btn-primary" @click="handleClick">
+  <img src="@/assets/icons/document-upload.svg" class="icon" width=16 alt="import icon" />
+  Import via CSV
+</button>
+```
+
+## Authentication
+- OTP-based authentication flow
+- No email/password logic
+- Supabase session management
+- Protected routes validation
+
+## API Development
+### Error Handling
+```typescript
+throw createError({
+  statusCode: 400,
+  statusMessage: 'missing_required_fields',  // snake_case for translation keys
+  message: 'All fields are required'  // Debug message
+})
+```
+
+### Database Connection
+```typescript
+import supabase from '@/server/api/helpers/supabase-conn';
+```
+
+### Authentication Pattern
+```typescript
+const { data: user, error: authError } = await supabase.auth.getUser(access_token)
+if (authError) {
+  throw createError({
+    statusCode: 401,
+    statusMessage: 'invalid_session',
+    message: 'Invalid or expired session'
+  })
+}
+```
+
+### Logging
+```typescript
+export default defineEventHandler(async (event) => {
+  const eventID = generateID()
+  try {
+    console.log(`${eventID} - Processing request:`, await readBody(event))
+    // ... handler logic
+    console.log(`${eventID} - Request completed successfully`)
+  } catch (error) {
+    console.error(`${eventID} - Error processing request:`, error)
+    throw error
+  }
+})
+```
+
+### Pagination Implementation
+```typescript
+export default defineEventHandler(async (event) => {
+  const query = getQuery(event)
+  const page = Math.max(1, parseInt(query.page as string) || 1)
+  const limit = Math.max(1, Math.min(100, parseInt(query.limit as string) || 10))
+  const offset = (page - 1) * limit
+
+  const { data, error, count } = await supabase
+    .from('table_name')
+    .select('*', { count: 'exact' })
+    .range(offset, offset + limit - 1)
+
+  if (error) {
+    throw createError({
+      statusCode: 500,
+      statusMessage: 'database_error',
+      message: error.message
+    })
+  }
+
+  return {
+    items: data,
+    pagination: {
+      page,
+      limit,
+      total: count || 0,
+      totalPages: Math.ceil((count || 0) / limit),
+      hasNextPage: (page * limit) < (count || 0),
+      hasPreviousPage: page > 1
+    }
+  }
+})
+```
+
+## Frontend API Calls
+```typescript
+const fetchData = async () => {
+  try {
+    const response = await $fetch(`/api/endpoint`, {
+      method: 'GET',
+      headers: {
+        authorization: `Bearer ${(await $supabase.auth.getSession()).data.session?.access_token}`
+      },
+      params: {
+        page: currentPage.value,
+        limit: pageSize.value,
+        search: searchQuery.value || undefined
+      }
+    })
+    // Handle response
+  } catch (err) {
+    // Error handling
+  }
+}
+```
+
+## Localization
+- Source file: en-uk.json
+- Required properties for entries:
+  - text: British English copy
+  - context: Detailed context for translation
+- Example:
+```json
+{
+  "key_name": {
+    "text": "British English text",
+    "context": "Detailed context explaining usage and meaning"
+  }
+}
+```
+
+## Testing
+### E2E Testing Rules
+- Use data-testid attributes instead of text content
+- Test user creation via test-user.ts helper
+- Database interaction using getTestSupabase helper
+- Example:
+```typescript
+// Element with test ID
+<span data-testid="test_element">Content</span>
+
+// Test assertion
+await expect(page.getByTestId('test_element')).toBeVisible()
+```
+
+### Test User Setup
+```typescript
+import { createTestUser } from './helpers/test-user';
+
+const testUser = await createTestUser(`test-owner-${generateRandomString(8)}@test.com`)
+const sessionData = {
+  access_token: testUser.access_token,
+  refresh_token: testUser.refresh_token,
+  expires_at: testUser.expires_at,
+  expires_in: testUser.expires_in,
+  user: testUser.user
+}
+
+await page.addInitScript((data) => {
+  localStorage.setItem('sb-localhost-auth-token', JSON.stringify(data))
+}, sessionData)
+```
+
+## Database Operations
+```typescript
+const supabase = getTestSupabase(true)
+const { data, error } = await supabase
+  .from('table_name')
+  .insert({
+    field: value
+  })
+  .select()
+  .single()
+```
