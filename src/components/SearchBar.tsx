@@ -10,7 +10,7 @@ interface SearchBarProps {
 
 const SearchBar: React.FC<SearchBarProps> = ({ 
   onSearch, 
-  placeholder = "Search for books...",
+  placeholder = "Search for books",
   className = ""
 }) => {
   const [query, setQuery] = useState('');
@@ -57,7 +57,7 @@ const SearchBar: React.FC<SearchBarProps> = ({
           onChange={handleChange}
           onKeyDown={handleKeyDown}
           placeholder={placeholder}
-          className="glass-input w-full rounded-md py-2 pl-9 pr-3 text-sm text-white placeholder-gray-400 input-glow focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all duration-200"
+          className="glass-input w-full rounded-md py-2 pl-9 pr-3 text-sm text-white placeholder-gray-400 input-glow"
         />
       </div>
       {query && (
