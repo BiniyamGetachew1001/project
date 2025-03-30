@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { Book, Check, Coffee, Star, Facebook, Twitter, Instagram } from 'lucide-react';
+import { Book, Check, Coffee, Star, Facebook, Twitter, Instagram, Sparkles, Target, Clock, Users } from 'lucide-react';
 
 const HomePage: React.FC = () => {
   return (
@@ -68,35 +68,125 @@ const HomePage: React.FC = () => {
         </div>
       </section>
       
-      {/* Free Content Section */}
-      <section className="py-12 px-6 md:px-10 bg-[#1a130d]">
+      {/* Why Choose Us Section */}
+      <section className="py-12 px-6 md:px-10 bg-[#2d1e14]">
         <div className="max-w-6xl mx-auto">
-          <h2 className="text-2xl font-bold mb-8 text-center">Start Reading Now</h2>
+          <div className="text-center mb-12">
+            <h2 className="text-3xl font-bold mb-4">Why Choose TilkTibeb</h2>
+            <p className="text-lg text-gray-300 max-w-2xl mx-auto">
+              We provide carefully curated business knowledge and practical insights to help you succeed in your entrepreneurial journey.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+            {/* Quality Content */}
+            <div className="text-center">
+              <div className="bg-[#1a130d] w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
+                <Sparkles size={28} className="text-[#c9a52c]" />
+              </div>
+              <h3 className="text-xl font-bold mb-2">Quality Content</h3>
+              <p className="text-gray-300">
+                Expert-curated summaries and business plans that focus on actionable insights.
+              </p>
+            </div>
+
+            {/* Targeted Learning */}
+            <div className="text-center">
+              <div className="bg-[#1a130d] w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
+                <Target size={28} className="text-[#c9a52c]" />
+              </div>
+              <h3 className="text-xl font-bold mb-2">Targeted Learning</h3>
+              <p className="text-gray-300">
+                Content organized by industry and business size for efficient learning.
+              </p>
+            </div>
+
+            {/* Time-Saving */}
+            <div className="text-center">
+              <div className="bg-[#1a130d] w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
+                <Clock size={28} className="text-[#c9a52c]" />
+              </div>
+              <h3 className="text-xl font-bold mb-2">Time-Saving</h3>
+              <p className="text-gray-300">
+                Get key business insights in minutes instead of hours or days.
+              </p>
+            </div>
+
+            {/* Community Driven */}
+            <div className="text-center">
+              <div className="bg-[#1a130d] w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
+                <Users size={28} className="text-[#c9a52c]" />
+              </div>
+              <h3 className="text-xl font-bold mb-2">Community Driven</h3>
+              <p className="text-gray-300">
+                Join a community of entrepreneurs sharing knowledge and experiences.
+              </p>
+            </div>
+          </div>
+
+          <div className="mt-12 text-center">
+            <Link to="/features" className="gold-button">
+              Explore All Features
+            </Link>
+          </div>
+        </div>
+      </section>
+      
+      {/* Free Content Section */}
+      <section className="py-12 px-6 md:px-10 bg-[#2d1e14]">
+        <div className="max-w-6xl mx-auto">
+          <div className="text-center mb-12">
+            <h2 className="text-3xl font-bold mb-4">Start Reading Now</h2>
+            <p className="text-lg text-gray-300 max-w-2xl mx-auto mb-8">
+              Begin your journey with our free content and discover the value we provide
+            </p>
+          </div>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {/* Free Book Summaries */}
-            <div className="glass-card p-6">
+            <div className="bg-[#1a130d] rounded-xl p-6 border border-[#4a2e1c] hover:border-[#c9a52c] transition-all duration-200">
+              <div className="bg-[#2d1e14] p-3 w-12 h-12 rounded-lg mb-4 flex items-center justify-center">
+                <Book size={24} className="text-[#c9a52c]" />
+              </div>
               <h3 className="text-xl font-semibold mb-4">Free Book Summaries</h3>
-              <p className="text-gray-300 mb-4">Access 3 premium book summaries instantly</p>
-              <Link to="/book-summaries" className="text-[#c9a52c] hover:text-[#ffd700]">
-                Read Now →
+              <p className="text-gray-300 mb-6">Access 3 premium book summaries instantly</p>
+              <Link 
+                to="/book-summaries" 
+                className="inline-flex items-center text-[#c9a52c] hover:text-[#ffd700] transition-colors"
+              >
+                Read Now 
+                <span className="ml-2">→</span>
               </Link>
             </div>
             
             {/* Free Business Ideas */}
-            <div className="glass-card p-6">
+            <div className="bg-[#1a130d] rounded-xl p-6 border border-[#4a2e1c] hover:border-[#c9a52c] transition-all duration-200">
+              <div className="bg-[#2d1e14] p-3 w-12 h-12 rounded-lg mb-4 flex items-center justify-center">
+                <Coffee size={24} className="text-[#c9a52c]" />
+              </div>
               <h3 className="text-xl font-semibold mb-4">Free Business Ideas</h3>
-              <p className="text-gray-300 mb-4">Get 1 business idea from each category</p>
-              <Link to="/business-plans" className="text-[#c9a52c] hover:text-[#ffd700]">
-                View Ideas →
+              <p className="text-gray-300 mb-6">Get 1 business idea from each category</p>
+              <Link 
+                to="/business-plans" 
+                className="inline-flex items-center text-[#c9a52c] hover:text-[#ffd700] transition-colors"
+              >
+                View Ideas 
+                <span className="ml-2">→</span>
               </Link>
             </div>
             
             {/* Premium Access */}
-            <div className="glass-card p-6">
+            <div className="bg-[#1a130d] rounded-xl p-6 border border-[#4a2e1c] hover:border-[#c9a52c] transition-all duration-200">
+              <div className="bg-[#2d1e14] p-3 w-12 h-12 rounded-lg mb-4 flex items-center justify-center">
+                <Star size={24} className="text-[#c9a52c]" />
+              </div>
               <h3 className="text-xl font-semibold mb-4">Unlock All Content</h3>
-              <p className="text-gray-300 mb-4">Get lifetime access to all content</p>
-              <Link to="/pricing" className="text-[#c9a52c] hover:text-[#ffd700]">
-                View Pricing →
+              <p className="text-gray-300 mb-6">Get lifetime access to all content</p>
+              <Link 
+                to="/pricing" 
+                className="inline-flex items-center text-[#c9a52c] hover:text-[#ffd700] transition-colors"
+              >
+                View Pricing 
+                <span className="ml-2">→</span>
               </Link>
             </div>
           </div>
