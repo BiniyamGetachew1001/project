@@ -14,6 +14,7 @@ import BlogPage from './pages/BlogPage';
 import BlogPostPage from './pages/BlogPostPage';
 import BookReadingPage from './pages/BookReadingPage';
 import BusinessPlanReadingPage from './pages/BusinessPlanReadingPage';
+import DatabaseTest from './components/DatabaseTest';
 import { BookmarkProvider } from './contexts/BookmarkContext';
 import './index.css';
 
@@ -44,6 +45,9 @@ const App = () => {
             <Route path="/settings" element={<SettingsPage />} />
             <Route path="/account" element={<AccountPage />} />
             <Route path="/offline-library" element={<OfflineLibraryPage />} />
+            <Route path="/test-db" element={<DatabaseTest />} />
+            <Route path="/books/:id" element={<BookReadingPage />} />
+            <Route path="/business-plans/:id" element={<BusinessPlanReadingPage />} />
           </Route>
           {/* Book Reading Page without Layout */}
           <Route path="/book-reading/:id" element={<BookReadingPage />} />

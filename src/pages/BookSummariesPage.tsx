@@ -1,210 +1,168 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { Bookmark, BookmarkCheck, Lock, Search } from 'lucide-react';
-import { mockSummaries, getUserReadingProgress } from '../data/mockData';
+import { Book, ChevronRight, Search } from 'lucide-react';
 import { useBookmarks } from '../contexts/BookmarkContext';
-
-// Get unique categories from mock data
-const categories = ['All Categories', ...new Set(mockSummaries.map(book => book.category))];
+import { getBooks } from '../lib/database';
+import type { Book as BookType } from '../types/database';
 
 const BookSummariesPage: React.FC = () => {
-  const { addBookmark, removeBookmark, isBookmarked } = useBookmarks();
+  const [books, setBooks] = useState<BookType[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
-  const [selectedCategory, setSelectedCategory] = useState('All Categories');
-  const [sortBy, setSortBy] = useState('newest');
+  const [selectedCategory, setSelectedCategory] = useState<string>('All');
+  const { addBookmark, removeBookmark, isBookmarked } = useBookmarks();
 
-  const handleBookmark = (e: React.MouseEvent, summary: typeof mockSummaries[0]) => {
-    e.preventDefault();
-    e.stopPropagation();
-    
-    if (isBookmarked(summary.id)) {
-      removeBookmark(summary.id);
-    } else {
-      addBookmark({
-        id: summary.id,
-        title: summary.title,
-        type: 'book',
-        author: summary.author,
-        category: summary.category,
-        description: summary.description
-      });
-    }
-  };
-
-  // Filter and sort books
-  const filteredBooks = useMemo(() => {
-    // First filter books based on search and category
-    const filtered = mockSummaries.filter(book => {
-      const matchesSearch = book.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                          book.author.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                          book.description.toLowerCase().includes(searchQuery.toLowerCase());
-      const matchesCategory = selectedCategory === 'All Categories' || book.category === selectedCategory;
-      return matchesSearch && matchesCategory;
-    });
-
-    // Sort books
-    const sorted = filtered.sort((a, b) => {
-      switch (sortBy) {
-        case 'oldest':
-          return a.id - b.id;
-        case 'popular':
-          return (getUserReadingProgress(b.id) || 0) - (getUserReadingProgress(a.id) || 0);
-        case 'readTime':
-          return parseInt(a.readTime) - parseInt(b.readTime);
-        default: // newest
-          return b.id - a.id;
+  useEffect(() => {
+    const fetchBooks = async () => {
+      try {
+        const data = await getBooks();
+        setBooks(data);
+      } catch (err) {
+        setError(err instanceof Error ? err.message : 'Failed to fetch books');
+      } finally {
+        setLoading(false);
       }
-    });
+    };
 
-    // Mark first 3 books as free and rest as premium
-    return sorted.map((book, index) => ({
-      ...book,
-      isFree: index < 3
-    }));
-  }, [searchQuery, selectedCategory, sortBy]);
+    fetchBooks();
+  }, []);
+
+  const categories = ['All', ...new Set(books.map(book => book.category))];
+
+  const filteredBooks = books.filter(book => {
+    const matchesSearch = book.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      book.author.toLowerCase().includes(searchQuery.toLowerCase());
+    const matchesCategory = selectedCategory === 'All' || book.category === selectedCategory;
+    return matchesSearch && matchesCategory;
+  });
+
+  if (loading) {
+    return (
+      <div className="min-h-screen p-6 md:p-10">
+        <div className="max-w-6xl mx-auto">
+          <h1 className="text-3xl font-bold mb-2">Loading Book Summaries...</h1>
+          <div className="animate-pulse">
+            <div className="h-10 bg-[#3a2819] rounded w-1/4 mb-6"></div>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {[1, 2, 3, 4, 5, 6].map((n) => (
+                <div key={n} className="glass-card aspect-[3/4]"></div>
+              ))}
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="min-h-screen p-6 md:p-10">
+        <div className="max-w-6xl mx-auto">
+          <h1 className="text-3xl font-bold mb-2 text-red-500">Error Loading Books</h1>
+          <p className="text-red-400">{error}</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
-    <div className="p-6 md:p-10">
-      <div className="max-w-6xl mx-auto">
-        <div className="mb-8">
-          <h1 className="text-2xl md:text-3xl font-bold mb-4">Book Summaries</h1>
-          
-          {/* Search and Filters */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            {/* Search Bar */}
-            <div className="relative">
-              <Search size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+    <div className="min-h-screen">
+      {/* Hero Section */}
+      <section className="py-12 px-6 md:px-10 bg-[#2d1e14]">
+        <div className="max-w-6xl mx-auto">
+          <h1 className="text-3xl md:text-4xl font-bold mb-4">
+            Book Summaries
+          </h1>
+          <p className="text-lg text-gray-300">
+            Discover key insights from the world's best business books
+          </p>
+        </div>
+      </section>
+
+      {/* Filters Section */}
+      <section className="py-6 px-6 md:px-10 bg-[#2d1e14]">
+        <div className="max-w-6xl mx-auto">
+          <div className="flex flex-col md:flex-row gap-4 items-start md:items-center">
+            {/* Search */}
+            <div className="relative flex-1">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
               <input
                 type="text"
                 placeholder="Search books..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full bg-[#3a2819] text-white rounded-md pl-10 pr-4 py-2 text-sm border border-[#7a4528] focus:outline-none focus:ring-1 focus:ring-[#c9a52c]"
+                className="w-full pl-10 pr-4 py-2 glass-input rounded-md"
               />
             </div>
 
-            {/* Category Filter */}
-            <select 
-              value={selectedCategory}
-              onChange={(e) => setSelectedCategory(e.target.value)}
-              className="bg-[#3a2819] text-white rounded-md px-3 py-2 text-sm border border-[#7a4528] focus:outline-none focus:ring-1 focus:ring-[#c9a52c]"
-            >
-              {categories.map(category => (
-                <option key={category} value={category}>{category}</option>
+            {/* Categories */}
+            <div className="flex gap-2 overflow-x-auto pb-2 md:pb-0">
+              {categories.map((category) => (
+                <button
+                  key={category}
+                  onClick={() => setSelectedCategory(category)}
+                  className={`px-4 py-2 rounded-md whitespace-nowrap ${
+                    selectedCategory === category
+                      ? 'gold-button'
+                      : 'glass-button'
+                  }`}
+                >
+                  {category}
+                </button>
               ))}
-            </select>
-
-            {/* Sort Options */}
-            <select
-              value={sortBy}
-              onChange={(e) => setSortBy(e.target.value)}
-              className="bg-[#3a2819] text-white rounded-md px-3 py-2 text-sm border border-[#7a4528] focus:outline-none focus:ring-1 focus:ring-[#c9a52c]"
-            >
-              <option value="newest">Sort by: Newest</option>
-              <option value="oldest">Sort by: Oldest</option>
-              <option value="popular">Sort by: Most Popular</option>
-              <option value="readTime">Sort by: Read Time</option>
-            </select>
-          </div>
-
-          {/* Results Count */}
-          <div className="mt-4 text-sm text-gray-400">
-            Showing {filteredBooks.length} {filteredBooks.length === 1 ? 'book' : 'books'}
-            {selectedCategory !== 'All Categories' && ` in ${selectedCategory}`}
+            </div>
           </div>
         </div>
-        
-        {/* Book Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {filteredBooks.map((summary) => {
-            const progress = getUserReadingProgress(summary.id);
-            const bookmarked = isBookmarked(summary.id);
-            
-            return (
-              <Link
-                to={summary.isFree ? `/book-reading/${summary.id}` : '/pricing'}
-                key={summary.id}
-                className={`bg-[#3a2819] rounded-lg overflow-hidden border transition-all duration-200 ${
-                  summary.isFree ? 'border-[#7a4528] hover:border-green-500' : 'border-[#7a4528] hover:border-[#c9a52c]'
-                }`}
+      </section>
+
+      {/* Books Grid */}
+      <section className="py-12 px-6 md:px-10">
+        <div className="max-w-6xl mx-auto">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {filteredBooks.map((book) => (
+              <Link 
+                key={book.id} 
+                to={`/books/${book.id}`}
+                className="block group"
               >
-                <div className="relative aspect-[3/2] overflow-hidden">
-                  <img
-                    src={summary.coverImage}
-                    alt={summary.title}
-                    className={`w-full h-full object-cover ${!summary.isFree ? 'filter brightness-50' : ''}`}
-                  />
-                  <div className="absolute top-0 right-0 p-2">
-                    <button
-                      onClick={(e) => handleBookmark(e, summary)}
-                      className="p-2 rounded-full bg-black/50 hover:bg-black/70 transition-colors"
-                    >
-                      {bookmarked ? (
-                        <BookmarkCheck size={20} className="text-[#c9a52c]" />
-                      ) : (
-                        <Bookmark size={20} className="text-white" />
-                      )}
-                    </button>
-                  </div>
-                  {!summary.isFree && (
-                    <div className="absolute inset-0 flex items-center justify-center bg-black/40">
-                      <div className="text-center">
-                        <Lock size={24} className="mx-auto mb-2 text-[#c9a52c]" />
-                        <span className="px-3 py-1 rounded-full bg-[#c9a52c] text-black text-xs font-medium">
-                          Premium Content
-                        </span>
-                      </div>
-                    </div>
-                  )}
-                  {summary.isFree && (
-                    <div className="absolute bottom-0 right-0 p-2">
-                      <span className="inline-flex items-center gap-1 px-2 py-1 rounded bg-green-500/80 text-white text-xs font-medium">
-                        Free
-                      </span>
-                    </div>
-                  )}
-                </div>
-                <div className="p-4">
-                  <div className="flex items-start justify-between gap-2">
-                    <h3 className="font-semibold text-lg leading-tight">{summary.title}</h3>
-                    {progress > 0 && summary.isFree && (
-                      <div className="shrink-0 w-8 h-8 rounded-full bg-[#7a4528] flex items-center justify-center">
-                        <span className="text-xs font-medium">{progress}%</span>
+                <div className="bg-[#2d1e14] rounded-xl p-4 transition-transform hover:scale-[1.02]">
+                  {/* Card Image */}
+                  <div className="relative aspect-[3/2] overflow-hidden">
+                    <img
+                      src={book.cover_image}
+                      alt={book.title}
+                      className={`w-full h-full object-cover transition-all duration-300 group-hover:scale-110 ${
+                        book.is_premium ? 'opacity-50' : ''
+                      }`}
+                    />
+                    {book.is_premium && (
+                      <div className="absolute top-2 right-2 bg-[#c9a52c] text-[#2d1e14] px-2 py-1 rounded text-sm font-medium">
+                        Premium
                       </div>
                     )}
                   </div>
-                  <p className="text-sm text-gray-400 mt-1">by {summary.author}</p>
-                  <div className="mt-2 flex items-center gap-2">
-                    <span className="text-xs px-2 py-1 rounded bg-[#7a4528] text-gray-300">
-                      {summary.category}
-                    </span>
-                    <span className="text-xs text-gray-400">
-                      {summary.readTime} min read
-                    </span>
+
+                  {/* Card Content */}
+                  <div className="p-4">
+                    <h3 className="font-bold text-lg mb-1 group-hover:text-[#c9a52c] transition-colors">
+                      {book.title}
+                    </h3>
+                    <p className="text-gray-400 text-sm mb-2">{book.author}</p>
+                    <p className="text-sm text-gray-300 line-clamp-2 mb-4">
+                      {book.description}
+                    </p>
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm text-[#c9a52c]">{book.read_time}</span>
+                      <ChevronRight size={20} className="text-[#c9a52c]" />
+                    </div>
                   </div>
-                  <p className="mt-3 text-sm text-gray-300 line-clamp-2">
-                    {summary.description}
-                  </p>
                 </div>
               </Link>
-            );
-          })}
+            ))}
+          </div>
         </div>
-        
-        {/* Load More Button */}
-        {filteredBooks.length > 0 && (
-          <div className="text-center mt-12">
-            <button className="secondary-button">Load More</button>
-          </div>
-        )}
-
-        {/* No Results */}
-        {filteredBooks.length === 0 && (
-          <div className="text-center py-12">
-            <p className="text-gray-400">No books found matching your criteria.</p>
-          </div>
-        )}
-      </div>
+      </section>
     </div>
   );
 };

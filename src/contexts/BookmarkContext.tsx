@@ -1,7 +1,7 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 
 export type BookmarkItem = {
-  id: number;
+  id: string;
   title: string;
   type: 'book' | 'business-plan';
   author?: string;
@@ -12,11 +12,19 @@ export type BookmarkItem = {
 type BookmarkContextType = {
   bookmarks: BookmarkItem[];
   addBookmark: (item: BookmarkItem) => void;
-  removeBookmark: (id: number) => void;
-  isBookmarked: (id: number) => boolean;
+  removeBookmark: (id: string) => void;
+  isBookmarked: (id: string) => boolean;
 };
 
 const BookmarkContext = createContext<BookmarkContextType | undefined>(undefined);
+
+export const useBookmarks = () => {
+  const context = useContext(BookmarkContext);
+  if (!context) {
+    throw new Error('useBookmarks must be used within a BookmarkProvider');
+  }
+  return context;
+};
 
 export const BookmarkProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [bookmarks, setBookmarks] = useState<BookmarkItem[]>(() => {
@@ -31,17 +39,15 @@ export const BookmarkProvider: React.FC<{ children: React.ReactNode }> = ({ chil
   }, [bookmarks]);
 
   const addBookmark = (item: BookmarkItem) => {
-    if (!isBookmarked(item.id)) {
-      setBookmarks([...bookmarks, item]);
-    }
+    setBookmarks(prev => [...prev, item]);
   };
 
-  const removeBookmark = (id: number) => {
-    setBookmarks(bookmarks.filter(bookmark => bookmark.id !== id));
+  const removeBookmark = (id: string) => {
+    setBookmarks(prev => prev.filter(item => item.id !== id));
   };
 
-  const isBookmarked = (id: number) => {
-    return bookmarks.some(bookmark => bookmark.id === id);
+  const isBookmarked = (id: string) => {
+    return bookmarks.some(item => item.id === id);
   };
 
   return (
@@ -51,10 +57,4 @@ export const BookmarkProvider: React.FC<{ children: React.ReactNode }> = ({ chil
   );
 };
 
-export const useBookmarks = () => {
-  const context = useContext(BookmarkContext);
-  if (context === undefined) {
-    throw new Error('useBookmarks must be used within a BookmarkProvider');
-  }
-  return context;
-};
+export default BookmarkProvider;

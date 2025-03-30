@@ -1,30 +1,38 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { ArrowLeft, Bookmark, BookmarkCheck, Coffee, Lock, ShoppingBag, TrendingUp, Truck, Utensils, Wifi } from 'lucide-react';
-import { businessPlans } from '../data/mockData';
+import { ArrowLeft, Bookmark, BookmarkCheck } from 'lucide-react';
+import { getBusinessPlanById } from '../lib/database';
 import { useBookmarks } from '../contexts/BookmarkContext';
-
-const iconMap: Record<string, React.ReactNode> = {
-  Coffee: <Coffee size={24} />,
-  ShoppingBag: <ShoppingBag size={24} />,
-  Utensils: <Utensils size={24} />,
-  Truck: <Truck size={24} />,
-  TrendingUp: <TrendingUp size={24} />,
-  Wifi: <Wifi size={24} />
-};
+import type { BusinessPlan } from '../types/database';
 
 const BusinessPlanReadingPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { addBookmark, removeBookmark, isBookmarked } = useBookmarks();
+  const [plan, setPlan] = useState<BusinessPlan | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<'overview' | 'market' | 'financial' | 'operations'>('overview');
 
-  const plan = businessPlans.find(p => p.id === Number(id));
-  if (!plan) {
-    return <div className="p-6">Business plan not found</div>;
-  }
+  useEffect(() => {
+    const fetchPlan = async () => {
+      if (!id) return;
+      try {
+        const data = await getBusinessPlanById(id);
+        setPlan(data);
+      } catch (err) {
+        setError(err instanceof Error ? err.message : 'Failed to fetch business plan');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchPlan();
+  }, [id]);
 
   const handleBookmark = () => {
+    if (!plan) return;
+    
     if (isBookmarked(plan.id)) {
       removeBookmark(plan.id);
     } else {
@@ -33,13 +41,42 @@ const BusinessPlanReadingPage: React.FC = () => {
         title: plan.title,
         type: 'business-plan',
         category: plan.category,
-        description: plan.description
+        description: plan.description || undefined
       });
     }
   };
 
+  if (loading) {
+    return (
+      <div className="min-h-screen p-6 md:p-10">
+        <div className="max-w-4xl mx-auto">
+          <div className="animate-pulse">
+            <div className="h-8 bg-[#3a2819] rounded w-1/4 mb-6"></div>
+            <div className="h-32 bg-[#3a2819] rounded mb-6"></div>
+            <div className="space-y-4">
+              {[1, 2, 3].map((n) => (
+                <div key={n} className="h-4 bg-[#3a2819] rounded"></div>
+              ))}
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (error || !plan) {
+    return (
+      <div className="min-h-screen p-6 md:p-10">
+        <div className="max-w-4xl mx-auto">
+          <h1 className="text-3xl font-bold mb-2 text-red-500">Error Loading Business Plan</h1>
+          <p className="text-red-400">{error || 'Business plan not found'}</p>
+        </div>
+      </div>
+    );
+  }
+
   return (
-    <div className="p-6 md:p-10">
+    <div className="min-h-screen p-6 md:p-10">
       <div className="max-w-4xl mx-auto">
         {/* Header */}
         <div className="flex items-center gap-4 mb-8">
@@ -50,15 +87,8 @@ const BusinessPlanReadingPage: React.FC = () => {
             <ArrowLeft size={24} />
           </button>
           <div className="flex-1">
-            <div className="flex items-center gap-3 mb-2">
-              <div className="bg-[#2d1e14] p-2 rounded-lg text-[#c9a52c]">
-                {iconMap[plan.icon]}
-              </div>
-              <span className="text-sm bg-[#2d1e14] text-[#c9a52c] py-1 px-2 rounded-md">
-                {plan.category}
-              </span>
-            </div>
             <h1 className="text-2xl md:text-3xl font-bold">{plan.title}</h1>
+            <p className="text-gray-400">{plan.category}</p>
           </div>
           <button 
             onClick={handleBookmark}
@@ -69,10 +99,10 @@ const BusinessPlanReadingPage: React.FC = () => {
         </div>
 
         {/* Cover Image */}
-        {plan.coverImage && (
+        {plan.cover_image && (
           <div className="mb-8">
             <img 
-              src={plan.coverImage} 
+              src={plan.cover_image} 
               alt={plan.title} 
               className="w-full h-64 md:h-96 object-cover rounded-xl"
             />
@@ -86,18 +116,23 @@ const BusinessPlanReadingPage: React.FC = () => {
         </div>
 
         {/* Tabs */}
-        <div className="flex gap-2 mb-8 overflow-x-auto pb-2">
-          {['overview', 'market', 'financial', 'operations'].map((tab) => (
+        <div className="flex gap-2 overflow-x-auto mb-8">
+          {[
+            { id: 'overview', label: 'Overview' },
+            { id: 'market', label: 'Market Analysis' },
+            { id: 'financial', label: 'Financial Plan' },
+            { id: 'operations', label: 'Operations' }
+          ].map((tab) => (
             <button
-              key={tab}
-              onClick={() => setActiveTab(tab as typeof activeTab)}
+              key={tab.id}
+              onClick={() => setActiveTab(tab.id as typeof activeTab)}
               className={`px-4 py-2 rounded-lg text-sm font-medium whitespace-nowrap ${
-                activeTab === tab
+                activeTab === tab.id
                   ? 'bg-[#c9a52c] text-black'
                   : 'bg-[#2d1e14] text-gray-300 hover:bg-[#3a2819]'
               }`}
             >
-              {tab.charAt(0).toUpperCase() + tab.slice(1)}
+              {tab.label}
             </button>
           ))}
         </div>
@@ -143,7 +178,7 @@ const BusinessPlanReadingPage: React.FC = () => {
               <div className="bg-[#2d1e14] p-6 rounded-lg">
                 <h3 className="text-lg font-bold mb-3">Startup Costs</h3>
                 <p className="text-gray-300 mb-4">
-                  Detailed breakdown of initial investment requirements and startup expenses.
+                  Initial investment required: {plan.investment}
                 </p>
                 <h3 className="text-lg font-bold mb-3">Revenue Projections</h3>
                 <p className="text-gray-300">
