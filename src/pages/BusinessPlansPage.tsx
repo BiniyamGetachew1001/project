@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import { Bookmark, BookmarkCheck, Coffee, Lock, ShoppingBag, TrendingUp, Truck, Utensils, Wifi } from 'lucide-react';
 import { businessPlans } from '../data/mockData';
@@ -15,6 +15,8 @@ const iconMap: Record<string, React.ReactNode> = {
 
 const BusinessPlansPage: React.FC = () => {
   const { addBookmark, removeBookmark, isBookmarked } = useBookmarks();
+  const [selectedCategory, setSelectedCategory] = useState('All Categories');
+  const [selectedInvestment, setSelectedInvestment] = useState('All Investment Ranges');
 
   const handleBookmark = (e: React.MouseEvent, plan: typeof businessPlans[0]) => {
     e.preventDefault();
@@ -33,19 +35,78 @@ const BusinessPlansPage: React.FC = () => {
     }
   };
 
+  // Get unique categories
+  const categories = ['All Categories', ...new Set(businessPlans.map(plan => plan.category))];
+
+  // Filter and process business plans
+  const processedPlans = useMemo(() => {
+    // First, filter based on selected category and investment range
+    let filtered = businessPlans;
+    
+    if (selectedCategory !== 'All Categories') {
+      filtered = filtered.filter(plan => plan.category === selectedCategory);
+    }
+
+    if (selectedInvestment !== 'All Investment Ranges') {
+      // Add investment range filtering logic here if needed
+    }
+
+    // Group by category
+    const groupedByCategory = filtered.reduce((acc, plan) => {
+      if (!acc[plan.category]) {
+        acc[plan.category] = [];
+      }
+      acc[plan.category].push(plan);
+      return acc;
+    }, {} as Record<string, typeof businessPlans>);
+
+    // For each category, mark the lowest investment plan as free
+    const processedWithFreeFlag = filtered.map(plan => {
+      const categoryPlans = groupedByCategory[plan.category];
+      const lowestInvestmentPlan = categoryPlans.reduce((lowest, current) => {
+        const getMinInvestment = (str: string) => parseInt(str.replace(/[^0-9]/g, ''));
+        const currentMin = getMinInvestment(current.investment);
+        const lowestMin = getMinInvestment(lowest.investment);
+        return currentMin < lowestMin ? current : lowest;
+      });
+
+      return {
+        ...plan,
+        isFree: plan.id === lowestInvestmentPlan.id
+      };
+    });
+
+    // Sort to show free plans first
+    return processedWithFreeFlag.sort((a, b) => {
+      if (a.isFree === b.isFree) {
+        // If both are free or both are premium, maintain category grouping
+        return a.category.localeCompare(b.category);
+      }
+      // Show free plans first
+      return a.isFree ? -1 : 1;
+    });
+  }, [selectedCategory, selectedInvestment]);
+
   return (
     <div className="p-6 md:p-10">
       <div className="max-w-6xl mx-auto">
         <div className="flex justify-between items-center mb-8">
           <h1 className="text-2xl md:text-3xl font-bold">Business Plans</h1>
           <div className="flex gap-3">
-            <select className="bg-[#3a2819] text-white rounded-md px-3 py-2 text-sm border border-[#7a4528] focus:outline-none focus:ring-1 focus:ring-[#c9a52c]">
-              <option>All Categories</option>
-              <option>Small Business</option>
-              <option>Medium Business</option>
-              <option>Large Business</option>
+            <select 
+              value={selectedCategory}
+              onChange={(e) => setSelectedCategory(e.target.value)}
+              className="bg-[#3a2819] text-white rounded-md px-3 py-2 text-sm border border-[#7a4528] focus:outline-none focus:ring-1 focus:ring-[#c9a52c]"
+            >
+              {categories.map(category => (
+                <option key={category} value={category}>{category}</option>
+              ))}
             </select>
-            <select className="bg-[#3a2819] text-white rounded-md px-3 py-2 text-sm border border-[#7a4528] focus:outline-none focus:ring-1 focus:ring-[#c9a52c]">
+            <select 
+              value={selectedInvestment}
+              onChange={(e) => setSelectedInvestment(e.target.value)}
+              className="bg-[#3a2819] text-white rounded-md px-3 py-2 text-sm border border-[#7a4528] focus:outline-none focus:ring-1 focus:ring-[#c9a52c]"
+            >
               <option>All Investment Ranges</option>
               <option>Under $10,000</option>
               <option>$10,000 - $50,000</option>
@@ -56,17 +117,24 @@ const BusinessPlansPage: React.FC = () => {
         </div>
         
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-12">
-          {businessPlans.map(plan => {
+          {processedPlans.map(plan => {
             const bookmarked = isBookmarked(plan.id);
+            const isLocked = !plan.isFree;
             
             return (
-              <div key={plan.id} className="bg-[#3a2819] rounded-xl overflow-hidden">
+              <Link
+                to={plan.isFree ? `/business-plan/${plan.id}` : '/pricing'}
+                key={plan.id}
+                className={`bg-[#3a2819] rounded-xl overflow-hidden border transition-all duration-200 ${
+                  plan.isFree ? 'border-[#7a4528] hover:border-green-500' : 'border-[#7a4528] hover:border-[#c9a52c]'
+                }`}
+              >
                 <div className="h-40 overflow-hidden relative">
                   {plan.coverImage && (
                     <img 
                       src={plan.coverImage} 
                       alt={plan.title} 
-                      className="w-full h-full object-cover"
+                      className={`w-full h-full object-cover ${isLocked ? 'filter brightness-50' : ''}`}
                     />
                   )}
                   <button 
@@ -79,17 +147,29 @@ const BusinessPlansPage: React.FC = () => {
                       <Bookmark size={18} className="text-white" />
                     )}
                   </button>
+                  {isLocked && (
+                    <div className="absolute inset-0 flex items-center justify-center bg-black/40">
+                      <div className="text-center">
+                        <Lock size={24} className="mx-auto mb-2 text-[#c9a52c]" />
+                        <span className="px-3 py-1 rounded-full bg-[#c9a52c] text-black text-xs font-medium">
+                          Premium Plan
+                        </span>
+                      </div>
+                    </div>
+                  )}
+                  {!isLocked && (
+                    <div className="absolute bottom-3 right-3">
+                      <span className="px-3 py-1 rounded-full bg-green-500/80 text-white text-xs font-medium">
+                        Free Plan
+                      </span>
+                    </div>
+                  )}
                 </div>
                 <div className="p-6">
                   <div className="flex justify-between items-start mb-4">
                     <div className="bg-[#2d1e14] p-3 rounded-lg text-[#c9a52c]">
                       {iconMap[plan.icon]}
                     </div>
-                    {plan.isPremium && (
-                      <div className="text-[#c9a52c] bg-[#2d1e14] p-1.5 rounded-full">
-                        <Lock size={16} />
-                      </div>
-                    )}
                   </div>
                   
                   <h3 className="text-xl font-bold mb-2">{plan.title}</h3>
@@ -104,11 +184,11 @@ const BusinessPlansPage: React.FC = () => {
                     <span className="text-xs bg-[#2d1e14] text-[#c9a52c] py-1 px-2 rounded-md">{plan.category}</span>
                   </div>
                   
-                  <button className={plan.isPremium ? "secondary-button w-full" : "gold-button w-full"}>
-                    {plan.isPremium ? "Unlock Business Plan" : "View Business Plan"}
+                  <button className={isLocked ? "secondary-button w-full" : "gold-button w-full"}>
+                    {isLocked ? "Unlock Business Plan" : "View Business Plan"}
                   </button>
                 </div>
-              </div>
+              </Link>
             );
           })}
         </div>

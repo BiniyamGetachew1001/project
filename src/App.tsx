@@ -13,6 +13,7 @@ import OfflineLibraryPage from './pages/OfflineLibraryPage';
 import BlogPage from './pages/BlogPage';
 import BlogPostPage from './pages/BlogPostPage';
 import BookReadingPage from './pages/BookReadingPage';
+import BusinessPlanReadingPage from './pages/BusinessPlanReadingPage';
 import { BookmarkProvider } from './contexts/BookmarkContext';
 import './index.css';
 
@@ -36,6 +37,7 @@ const App = () => {
             <Route path="/book-summaries" element={<BookSummariesPage />} />
             <Route path="/books/:id" element={<BookDetailPage />} />
             <Route path="/business-plans" element={<BusinessPlansPage />} />
+            <Route path="/business-plan/:id" element={<BusinessPlanReadingPage />} />
             <Route path="/blog" element={<BlogPage />} />
             <Route path="/blog/:id" element={<BlogPostPage />} />
             <Route path="/bookmarks" element={<BookmarksPage />} />
