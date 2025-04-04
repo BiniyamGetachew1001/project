@@ -6,7 +6,7 @@ export const getBooks = async () => {
   const { data, error } = await supabase
     .from('books')
     .select('*');
-  
+
   if (error) {
     console.error('Error fetching books:', error);
     throw new Error(`Failed to fetch books: ${error.message}`);
@@ -20,7 +20,7 @@ export const getBookById = async (id: string) => {
     .select('*')
     .eq('id', id)
     .single();
-  
+
   if (error) {
     console.error('Error fetching book:', error);
     throw new Error(`Failed to fetch book: ${error.message}`);
@@ -33,7 +33,7 @@ export const getBusinessPlans = async () => {
   const { data, error } = await supabase
     .from('business_plans')
     .select('*');
-  
+
   if (error) {
     console.error('Error fetching business plans:', error);
     throw new Error(`Failed to fetch business plans: ${error.message}`);
@@ -47,7 +47,7 @@ export const getBusinessPlanById = async (id: string) => {
     .select('*')
     .eq('id', id)
     .single();
-  
+
   if (error) {
     console.error('Error fetching business plan:', error);
     throw new Error(`Failed to fetch business plan: ${error.message}`);
@@ -61,7 +61,7 @@ export const getBookmarks = async (userId: string) => {
     .from('bookmarks')
     .select('*')
     .eq('user_id', userId);
-  
+
   if (error) {
     console.error('Error fetching bookmarks:', error);
     throw new Error(`Failed to fetch bookmarks: ${error.message}`);
@@ -75,7 +75,7 @@ export const addBookmark = async (bookmark: Omit<Bookmark, 'id' | 'created_at'>)
     .insert([bookmark])
     .select()
     .single();
-  
+
   if (error) {
     console.error('Error adding bookmark:', error);
     throw new Error(`Failed to add bookmark: ${error.message}`);
@@ -88,9 +88,39 @@ export const removeBookmark = async (id: string) => {
     .from('bookmarks')
     .delete()
     .eq('id', id);
-  
+
   if (error) {
     console.error('Error removing bookmark:', error);
     throw new Error(`Failed to remove bookmark: ${error.message}`);
   }
-}; 
+};
+
+// Add a new book
+export const addBook = async (book: Omit<Book, 'id' | 'created_at' | 'updated_at'>) => {
+  const { data, error } = await supabase
+    .from('books')
+    .insert([book])
+    .select()
+    .single();
+
+  if (error) {
+    console.error('Error adding book:', error);
+    throw new Error(`Failed to add book: ${error.message}`);
+  }
+  return data as Book;
+};
+
+// Add a new business plan
+export const addBusinessPlan = async (plan: Omit<BusinessPlan, 'id' | 'created_at' | 'updated_at'>) => {
+  const { data, error } = await supabase
+    .from('business_plans')
+    .insert([plan])
+    .select()
+    .single();
+
+  if (error) {
+    console.error('Error adding business plan:', error);
+    throw new Error(`Failed to add business plan: ${error.message}`);
+  }
+  return data as BusinessPlan;
+};
