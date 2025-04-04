@@ -152,6 +152,16 @@ body {
   @apply p-2 hover:bg-[#3a2819] rounded-md cursor-pointer transition-colors;
 }
 
+/* Enhanced Reading Page Styles */
+.hide-scrollbar {
+  -ms-overflow-style: none;  /* IE and Edge */
+  scrollbar-width: none;  /* Firefox */
+}
+
+.hide-scrollbar::-webkit-scrollbar {
+  display: none; /* Chrome, Safari, Opera */
+}
+
 .chapter-nav-item.active {
   @apply bg-[#3a2819] text-[#c9a52c];
 }

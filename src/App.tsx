@@ -5,17 +5,20 @@ import PricingPage from './pages/PricingPage';
 import FeaturesPage from './pages/FeaturesPage';
 import BookSummariesPage from './pages/BookSummariesPage';
 import BusinessPlansPage from './pages/BusinessPlansPage';
-import BookDetailPage from './pages/BookDetailPage';
 import BookmarksPage from './pages/BookmarksPage';
 import SettingsPage from './pages/SettingsPage';
 import AccountPage from './pages/AccountPage';
 import OfflineLibraryPage from './pages/OfflineLibraryPage';
 import BlogPage from './pages/BlogPage';
 import BlogPostPage from './pages/BlogPostPage';
-import BookReadingPage from './pages/BookReadingPage';
+import EnhancedBookReadingPage from './pages/EnhancedBookReadingPage';
 import BusinessPlanReadingPage from './pages/BusinessPlanReadingPage';
 import ContentManagementPage from './pages/ContentManagementPage';
+import SimpleAdminPage from './pages/SimpleAdminPage';
+import MockDataPage from './pages/MockDataPage';
+import BookDebugPage from './pages/BookDebugPage';
 import DatabaseTest from './components/DatabaseTest';
+import AdminAuth from './components/AdminAuth';
 import { BookmarkProvider } from './contexts/BookmarkContext';
 import './index.css';
 
@@ -37,7 +40,7 @@ const App = () => {
             <Route path="/pricing" element={<PricingPage />} />
             <Route path="/features" element={<FeaturesPage />} />
             <Route path="/book-summaries" element={<BookSummariesPage />} />
-            <Route path="/books/:id" element={<BookDetailPage />} />
+<Route path="/books/:id" element={<EnhancedBookReadingPage />} />
             <Route path="/business-plans" element={<BusinessPlansPage />} />
             <Route path="/business-plan/:id" element={<BusinessPlanReadingPage />} />
             <Route path="/blog" element={<BlogPage />} />
@@ -47,12 +50,16 @@ const App = () => {
             <Route path="/account" element={<AccountPage />} />
             <Route path="/offline-library" element={<OfflineLibraryPage />} />
             <Route path="/test-db" element={<DatabaseTest />} />
-            <Route path="/content-management" element={<ContentManagementPage />} />
-            <Route path="/books/:id" element={<BookReadingPage />} />
             <Route path="/business-plans/:id" element={<BusinessPlanReadingPage />} />
           </Route>
-          {/* Book Reading Page without Layout */}
-          <Route path="/book-reading/:id" element={<BookReadingPage />} />
+          {/* We've removed the duplicate BookReadingPage route to avoid confusion */}
+
+          {/* Hidden admin routes - accessible only by direct URL and password */}
+          <Route path="/admin-portal" element={<AdminAuth><ContentManagementPage /></AdminAuth>} />
+          <Route path="/simple-admin" element={<SimpleAdminPage />} />
+          <Route path="/protected-admin" element={<AdminAuth><SimpleAdminPage /></AdminAuth>} />
+          <Route path="/mock-data" element={<MockDataPage />} />
+          <Route path="/book-debug" element={<BookDebugPage />} />
         </Routes>
       </BookmarkProvider>
     </Router>
