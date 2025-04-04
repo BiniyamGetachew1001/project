@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { Search, Filter, Lock, Clock } from 'lucide-react';
+import { Search, Filter, Lock, Clock, Bookmark, BookmarkCheck } from 'lucide-react';
 import { getBooks } from '../lib/database';
 import { useBookmarks } from '../contexts/BookmarkContext';
 import type { Book } from '../types/database';
@@ -11,7 +11,7 @@ const BookSummariesPage: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
-  const { isBookmarked } = useBookmarks();
+  const { isBookmarked, addBookmark, removeBookmark } = useBookmarks();
 
   useEffect(() => {
     const fetchBooks = async () => {
@@ -88,7 +88,7 @@ const BookSummariesPage: React.FC = () => {
               <span className="text-[#c9a52c]"> First 3 books are free!</span>
             </p>
           </div>
-          
+
           {/* Search Bar */}
           <div className="relative flex-shrink-0 w-full md:w-64">
             <input
@@ -122,60 +122,86 @@ const BookSummariesPage: React.FC = () => {
         {/* Books Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {filteredBooks.map((book, index) => (
-            <Link 
-              key={book.id} 
-              to={isBookFree(index) ? `/books/${book.id}` : '/pricing'}
-              className="block group"
-            >
-              <div className="bg-[#2d1e14] rounded-xl p-4 transition-transform hover:scale-[1.02]">
-                {/* Card Image */}
-                <div className="relative aspect-[3/2] overflow-hidden rounded-lg mb-4">
-                  {book.cover_image ? (
-                    <img
-                      src={book.cover_image}
-                      alt={book.title}
-                      className="w-full h-full object-cover"
-                    />
-                  ) : (
-                    <div className="w-full h-full bg-[#3a2819] flex items-center justify-center">
-                      <Filter size={32} className="text-gray-600" />
-                    </div>
-                  )}
-                  {!isBookFree(index) && (
-                    <div className="absolute inset-0 bg-black/60 flex items-center justify-center">
-                      <div className="text-center">
-                        <Lock size={24} className="mx-auto mb-2 text-[#c9a52c]" />
-                        <span className="text-[#c9a52c] font-medium">Premium</span>
+            <div key={book.id} className="relative">
+              <Link
+                to={isBookFree(index) ? `/books/${book.id}` : '/pricing'}
+                className="block group"
+              >
+                <div className="bg-[#2d1e14] rounded-xl p-4 transition-transform hover:scale-[1.02]">
+                  {/* Card Image */}
+                  <div className="relative aspect-[3/2] overflow-hidden rounded-lg mb-4">
+                    {book.cover_image ? (
+                      <img
+                        src={book.cover_image}
+                        alt={book.title}
+                        className="w-full h-full object-cover"
+                      />
+                    ) : (
+                      <div className="w-full h-full bg-[#3a2819] flex items-center justify-center">
+                        <Filter size={32} className="text-gray-600" />
                       </div>
-                    </div>
-                  )}
-                  {isBookFree(index) && (
-                    <div className="absolute top-2 right-2 bg-green-500/90 text-white px-2 py-1 rounded text-sm font-medium">
-                      Free
-                    </div>
-                  )}
-                </div>
+                    )}
+                    {!isBookFree(index) && (
+                      <div className="absolute inset-0 bg-black/60 flex items-center justify-center">
+                        <div className="text-center">
+                          <Lock size={24} className="mx-auto mb-2 text-[#c9a52c]" />
+                          <span className="text-[#c9a52c] font-medium">Premium</span>
+                        </div>
+                      </div>
+                    )}
+                    {isBookFree(index) && (
+                      <div className="absolute top-2 right-2 bg-green-500/90 text-white px-2 py-1 rounded text-sm font-medium">
+                        Free
+                      </div>
+                    )}
+                  </div>
 
-                {/* Card Content */}
-                <div>
-                  <h3 className="font-bold mb-2 group-hover:text-[#c9a52c] transition-colors">
-                    {book.title}
-                  </h3>
-                  <p className="text-sm text-gray-400 line-clamp-2 mb-4">
-                    {book.description}
-                  </p>
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm bg-[#3a2819] text-[#c9a52c] py-1 px-2 rounded">
-                      {book.category}
-                    </span>
-                    <div className="flex items-center gap-1 text-sm text-[#c9a52c]">
-                      <Clock size={14} />
-                      <span>{book.read_time}</span>
+                  {/* Card Content */}
+                  <div>
+                    <h3 className="font-bold mb-2 group-hover:text-[#c9a52c] transition-colors">
+                      {book.title}
+                    </h3>
+                    <p className="text-sm text-gray-400 line-clamp-2 mb-4">
+                      {book.description}
+                    </p>
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm bg-[#3a2819] text-[#c9a52c] py-1 px-2 rounded">
+                        {book.category}
+                      </span>
+                      <div className="flex items-center gap-1 text-sm text-[#c9a52c]">
+                        <Clock size={14} />
+                        <span>{book.read_time}</span>
+                      </div>
                     </div>
                   </div>
                 </div>
-              </div>
-            </Link>
+              </Link>
+              {/* Bookmark Button */}
+              <button
+                onClick={() => {
+                  if (isBookmarked(book.id)) {
+                    removeBookmark(book.id);
+                  } else {
+                    addBookmark({
+                      id: book.id,
+                      title: book.title,
+                      type: 'book',
+                      author: book.author,
+                      category: book.category,
+                      description: book.description || undefined
+                    });
+                  }
+                }}
+                className="absolute top-4 right-4 bg-[#2d1e14] p-2 rounded-full hover:bg-[#3a2819] transition-colors z-10"
+                aria-label={isBookmarked(book.id) ? "Remove from bookmarks" : "Add to bookmarks"}
+              >
+                {isBookmarked(book.id) ? (
+                  <BookmarkCheck size={18} className="text-[#c9a52c]" />
+                ) : (
+                  <Bookmark size={18} className="text-white" />
+                )}
+              </button>
+            </div>
           ))}
         </div>
 
