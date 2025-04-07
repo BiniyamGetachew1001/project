@@ -17,6 +17,7 @@ import ContentManagementPage from './pages/ContentManagementPage';
 import SimpleAdminPage from './pages/SimpleAdminPage';
 import MockDataPage from './pages/MockDataPage';
 import BookDebugPage from './pages/BookDebugPage';
+import SimpleBlogForm from './pages/SimpleBlogForm';
 import DatabaseTest from './components/DatabaseTest';
 import AdminAuth from './components/AdminAuth';
 import { BookmarkProvider } from './contexts/BookmarkContext';
@@ -60,6 +61,7 @@ const App = () => {
           <Route path="/protected-admin" element={<AdminAuth><SimpleAdminPage /></AdminAuth>} />
           <Route path="/mock-data" element={<MockDataPage />} />
           <Route path="/book-debug" element={<BookDebugPage />} />
+          <Route path="/simple-blog" element={<SimpleBlogForm />} />
         </Routes>
       </BookmarkProvider>
     </Router>

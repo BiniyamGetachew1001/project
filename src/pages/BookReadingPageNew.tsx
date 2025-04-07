@@ -1,262 +1,70 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { ArrowLeft, Bookmark, BookmarkCheck, Volume2, VolumeX, Share2, Sun, Moon, PenLine, Save, Type, ChevronUp, ChevronDown, Maximize, Minimize } from 'lucide-react';
-import { supabase } from '../lib/supabase';
 import { useBookmarks } from '../contexts/BookmarkContext';
-import type { Book } from '../types/database';
 
-// Import the same mock books from BookSummariesPage
-// Mock books data for demonstration
-const mockBooks: Book[] = [
-  {
-    id: 'book-1',
-    title: 'The Lean Startup',
-    author: 'Eric Ries',
-    category: 'Business',
-    is_premium: false,
-    description: 'How Today\'s Entrepreneurs Use Continuous Innovation to Create Radically Successful Businesses',
-    read_time: '15 min',
-    cover_image: 'https://m.media-amazon.com/images/I/51T-sMqSMiL._SY291_BO1,204,203,200_QL40_FMwebp_.jpg',
-    content: {
-      summary: 'The Lean Startup provides a scientific approach to creating and managing startups and getting a desired product to customers\' hands faster. The Lean Startup method teaches you how to drive a startup—how to steer, when to turn, and when to persevere—and grow a business with maximum acceleration.',
-      keyPoints: [
-        'Build-Measure-Learn feedback loop is the core of the Lean Startup methodology',
-        'Validated learning is the process of demonstrating empirically that a team has discovered valuable truths about a startup\'s present and future business prospects',
-        'Minimum Viable Product (MVP) helps entrepreneurs start the process of learning as quickly as possible',
-        'Innovation accounting allows startups to objectively prove they are learning how to grow a sustainable business'
-      ],
-      chapters: [
-        {
-          title: 'Chapter 1: Start',
-          content: 'The Lean Startup method is based on lean manufacturing principles, agile development methodologies, and the scientific method. It aims to eliminate waste and increase value-creating practices during the product development phase.'
-        },
-        {
-          title: 'Chapter 2: Define',
-          content: 'A startup is a human institution designed to create a new product or service under conditions of extreme uncertainty. The goal of a startup is to figure out the right thing to build—the thing customers want and will pay for—as quickly as possible.'
-        },
-        {
-          title: 'Chapter 3: Learn',
-          content: 'The fundamental activity of a startup is to turn ideas into products, measure how customers respond, and then learn whether to pivot or persevere. All successful startup processes should be geared to accelerate that feedback loop.'
-        }
-      ],
-      quotes: [
-        'The only way to win is to learn faster than anyone else.',
-        'Success is not delivering a feature; success is learning how to solve the customer\'s problem.',
-        'As you consider building your own minimum viable product, let this simple rule suffice: remove any feature, process, or effort that does not contribute directly to the learning you seek.'
-      ]
-    },
-    created_at: new Date().toISOString(),
-    updated_at: new Date().toISOString()
-  },
-  {
-    id: 'book-2',
-    title: 'Atomic Habits',
-    author: 'James Clear',
-    category: 'Self-Help',
-    is_premium: false,
-    description: 'An Easy & Proven Way to Build Good Habits & Break Bad Ones',
-    read_time: '12 min',
-    cover_image: 'https://m.media-amazon.com/images/I/51-nXsSRfZL._SY291_BO1,204,203,200_QL40_FMwebp_.jpg',
-    content: {
-      summary: 'Atomic Habits offers a proven framework for improving every day. James Clear reveals practical strategies that will teach you exactly how to form good habits, break bad ones, and master the tiny behaviors that lead to remarkable results.',
-      keyPoints: [
-        'Small habits make a big difference over time',
-        'Focus on your identity, not just your goals',
-        'The four laws of behavior change: make it obvious, make it attractive, make it easy, make it satisfying',
-        'Environment design is more important than motivation'
-      ],
-      chapters: [
-        {
-          title: 'Chapter 1: The Surprising Power of Atomic Habits',
-          content: 'Habits are the compound interest of self-improvement. Getting 1 percent better every day counts for a lot in the long-run. Small changes often appear to make no difference until you cross a critical threshold.'
-        },
-        {
-          title: 'Chapter 2: How Your Habits Shape Your Identity',
-          content: 'The most effective way to change your habits is to focus not on what you want to achieve, but on who you wish to become. Your identity emerges out of your habits.'
-        },
-        {
-          title: 'Chapter 3: How to Build Better Habits',
-          content: 'The process of building a habit can be divided into four simple steps: cue, craving, response, and reward. Understanding these steps is the key to understanding how habits work.'
-        }
-      ],
-      quotes: [
-        'You do not rise to the level of your goals. You fall to the level of your systems.',
-        'Every action you take is a vote for the type of person you wish to become.',
-        'Habits are the compound interest of self-improvement.'
-      ]
-    },
-    created_at: new Date().toISOString(),
-    updated_at: new Date().toISOString()
-  },
-  {
-    id: 'book-3',
-    title: 'Zero to One',
-    author: 'Peter Thiel',
-    category: 'Business',
-    is_premium: false,
-    description: 'Notes on Startups, or How to Build the Future',
-    read_time: '10 min',
-    cover_image: 'https://m.media-amazon.com/images/I/41puRJbtwkL._SY291_BO1,204,203,200_QL40_FMwebp_.jpg',
-    content: {
-      summary: 'Zero to One presents at once an optimistic view of the future of progress in America and a new way of thinking about innovation: it starts by learning to ask the questions that lead you to find value in unexpected places.',
-      keyPoints: [
-        'Creating something new is going from 0 to 1, while copying things that work is going from 1 to n',
-        'The most valuable businesses solve unique problems',
-        'Competition is overrated; monopolies drive progress',
-        'Successful people find value in unexpected places'
-      ],
-      chapters: [
-        {
-          title: 'Chapter 1: The Challenge of the Future',
-          content: 'Progress can take two forms: horizontal progress (copying things that work) or vertical progress (doing new things). Horizontal progress is easy but vertical progress is difficult.'
-        },
-        {
-          title: 'Chapter 2: Party Like It\'s 1999',
-          content: 'The dot-com crash taught entrepreneurs the wrong lessons. Instead of learning to be bold and have vision, they learned to be unoriginal and incremental.'
-        },
-        {
-          title: 'Chapter 3: All Happy Companies Are Different',
-          content: 'Monopolies drive progress because they can think long-term and invest in innovation. Competition, on the other hand, leads to commoditization and lack of profits.'
-        }
-      ],
-      quotes: [
-        'What important truth do very few people agree with you on?',
-        'The most contrarian thing of all is not to oppose the crowd but to think for yourself.',
-        'Monopoly is the condition of every successful business.'
-      ]
-    },
-    created_at: new Date().toISOString(),
-    updated_at: new Date().toISOString()
+// Default book content that will always be displayed
+const defaultBook = {
+  id: 'default-book',
+  title: 'The Lean Startup',
+  author: 'Eric Ries',
+  category: 'Business',
+  is_premium: false,
+  description: 'How Today\'s Entrepreneurs Use Continuous Innovation to Create Radically Successful Businesses',
+  read_time: '15 min',
+  cover_image: 'https://m.media-amazon.com/images/I/51T-sMqSMiL._SY291_BO1,204,203,200_QL40_FMwebp_.jpg',
+  content: {
+    summary: 'The Lean Startup provides a scientific approach to creating and managing startups and getting a desired product to customers\' hands faster. The Lean Startup method teaches you how to drive a startup—how to steer, when to turn, and when to persevere—and grow a business with maximum acceleration.',
+    keyPoints: [
+      'Build-Measure-Learn feedback loop is the core of the Lean Startup methodology',
+      'Validated learning is the process of demonstrating empirically that a team has discovered valuable truths about a startup\'s present and future business prospects',
+      'Minimum Viable Product (MVP) helps entrepreneurs start the process of learning as quickly as possible',
+      'Innovation accounting allows startups to objectively prove they are learning how to grow a sustainable business'
+    ],
+    chapters: [
+      {
+        title: 'Chapter 1: Start',
+        content: 'The Lean Startup method is based on lean manufacturing principles, agile development methodologies, and the scientific method. It aims to eliminate waste and increase value-creating practices during the product development phase.'
+      },
+      {
+        title: 'Chapter 2: Define',
+        content: 'A startup is a human institution designed to create a new product or service under conditions of extreme uncertainty. The goal of a startup is to figure out the right thing to build—the thing customers want and will pay for—as quickly as possible.'
+      },
+      {
+        title: 'Chapter 3: Learn',
+        content: 'The fundamental activity of a startup is to turn ideas into products, measure how customers respond, and then learn whether to pivot or persevere. All successful startup processes should be geared to accelerate that feedback loop.'
+      }
+    ],
+    quotes: [
+      'The only way to win is to learn faster than anyone else.',
+      'Success is not delivering a feature; success is learning how to solve the customer\'s problem.',
+      'As you consider building your own minimum viable product, let this simple rule suffice: remove any feature, process, or effort that does not contribute directly to the learning you seek.'
+    ]
   }
-];
+};
 
-const BookReadingPage: React.FC = () => {
+const BookReadingPageNew: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { addBookmark, removeBookmark, isBookmarked } = useBookmarks();
-  const [book, setBook] = useState<Book | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<'summary' | 'key-points' | 'chapters' | 'quotes'>('summary');
   const [isSpeaking, setIsSpeaking] = useState(false);
   const [fontSize, setFontSize] = useState<'small' | 'medium' | 'large'>('medium');
   const [theme, setTheme] = useState<'dark' | 'light'>('dark');
   const [isFullscreen, setIsFullscreen] = useState(false);
-  const [showControls, setShowControls] = useState(false);
   const [readingProgress, setReadingProgress] = useState(0);
   const [notes, setNotes] = useState<string>('');
   const [isAddingNote, setIsAddingNote] = useState(false);
   const contentRef = useRef<HTMLDivElement>(null);
   const speechSynthesisRef = useRef<SpeechSynthesisUtterance | null>(null);
 
-  // This is a mock book to use as a fallback if no books are found
-  const mockBook: Book = {
-    id: 'mock-book-id',
-    title: 'The Lean Startup',
-    author: 'Eric Ries',
-    category: 'Business',
-    is_premium: false,
-    description: 'How Today\'s Entrepreneurs Use Continuous Innovation to Create Radically Successful Businesses',
-    read_time: '15 min',
-    cover_image: 'https://m.media-amazon.com/images/I/51T-sMqSMiL._SY291_BO1,204,203,200_QL40_FMwebp_.jpg',
-    content: {
-      summary: 'The Lean Startup provides a scientific approach to creating and managing startups and getting a desired product to customers\' hands faster. The Lean Startup method teaches you how to drive a startup—how to steer, when to turn, and when to persevere—and grow a business with maximum acceleration.',
-      keyPoints: [
-        'Build-Measure-Learn feedback loop is the core of the Lean Startup methodology',
-        'Validated learning is the process of demonstrating empirically that a team has discovered valuable truths about a startup\'s present and future business prospects',
-        'Minimum Viable Product (MVP) helps entrepreneurs start the process of learning as quickly as possible',
-        'Innovation accounting allows startups to objectively prove they are learning how to grow a sustainable business'
-      ],
-      chapters: [
-        {
-          title: 'Chapter 1: Start',
-          content: 'The Lean Startup method is based on lean manufacturing principles, agile development methodologies, and the scientific method. It aims to eliminate waste and increase value-creating practices during the product development phase.'
-        },
-        {
-          title: 'Chapter 2: Define',
-          content: 'A startup is a human institution designed to create a new product or service under conditions of extreme uncertainty. The goal of a startup is to figure out the right thing to build—the thing customers want and will pay for—as quickly as possible.'
-        },
-        {
-          title: 'Chapter 3: Learn',
-          content: 'The fundamental activity of a startup is to turn ideas into products, measure how customers respond, and then learn whether to pivot or persevere. All successful startup processes should be geared to accelerate that feedback loop.'
-        }
-      ],
-      quotes: [
-        'The only way to win is to learn faster than anyone else.',
-        'Success is not delivering a feature; success is learning how to solve the customer\'s problem.',
-        'As you consider building your own minimum viable product, let this simple rule suffice: remove any feature, process, or effort that does not contribute directly to the learning you seek.'
-      ]
-    },
-    created_at: new Date().toISOString(),
-    updated_at: new Date().toISOString()
-  };
+  // Always use the default book
+  const book = defaultBook;
 
+  // Log the book ID for debugging
   useEffect(() => {
-    const fetchBook = async () => {
-      if (!id) return;
-      try {
-        console.log('Fetching book with ID:', id);
-
-        // First, try to find the book in our mock data
-        const foundMockBook = mockBooks.find(book => book.id === id);
-        if (foundMockBook) {
-          console.log('Book found in mock data:', foundMockBook);
-          setBook(foundMockBook);
-          return;
-        }
-
-        // If not found in mock data, try to find a book with a similar ID
-        // This handles cases where the ID might have hyphens or different formatting
-        const normalizedSearchId = id.replace(/[-]/g, '');
-        const foundByNormalizedId = mockBooks.find(book => {
-          const normalizedBookId = book.id.replace(/[-]/g, '');
-          return normalizedBookId === normalizedSearchId;
-        });
-
-        if (foundByNormalizedId) {
-          console.log('Book found by normalized ID:', foundByNormalizedId);
-          setBook(foundByNormalizedId);
-          return;
-        }
-
-        // If still not found, try the database as a fallback
-        try {
-          const { data: dbBook, error } = await supabase
-            .from('books')
-            .select('*')
-            .eq('id', id)
-            .single();
-
-          if (error) throw error;
-          if (dbBook) {
-            console.log('Book found in database:', dbBook);
-            setBook(dbBook);
-            return;
-          }
-        } catch (dbError) {
-          console.warn('Error fetching from database:', dbError);
-        }
-
-        // If all else fails, just use the first mock book
-        console.log('No matching book found, using first mock book as fallback');
-        setBook(mockBooks[0]);
-      } catch (err) {
-        console.error('Error in book fetching process:', err);
-        // Always show a book, even if there's an error
-        setBook(mockBooks[0]);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchBook();
-
-    // Cleanup function for speech synthesis
-    return () => {
-      if (speechSynthesisRef.current && window.speechSynthesis) {
-        window.speechSynthesis.cancel();
-      }
-    };
+    console.log('BookReadingPageNew - Book ID from URL:', id);
+    console.log('Using default book:', defaultBook.title);
   }, [id]);
 
   // Track reading progress
@@ -307,8 +115,6 @@ const BookReadingPage: React.FC = () => {
 
   // Text-to-speech functionality
   const toggleSpeech = () => {
-    if (!book) return;
-
     if (isSpeaking) {
       if (window.speechSynthesis) {
         window.speechSynthesis.cancel();
@@ -317,6 +123,7 @@ const BookReadingPage: React.FC = () => {
       return;
     }
 
+    const content = book.content;
     const text = activeTab === 'summary' ? content.summary :
       activeTab === 'key-points' ? content.keyPoints.join('. ') :
       activeTab === 'chapters' ? content.chapters.map(c => `${c.title}. ${c.content}`).join('. ') :
@@ -334,8 +141,6 @@ const BookReadingPage: React.FC = () => {
 
   // Share functionality
   const shareContent = async () => {
-    if (!book) return;
-
     const shareData = {
       title: book.title,
       text: `Check out this summary of "${book.title}" by ${book.author}`,
@@ -373,8 +178,6 @@ const BookReadingPage: React.FC = () => {
   };
 
   const handleBookmark = () => {
-    if (!book) return;
-
     if (isBookmarked(book.id)) {
       removeBookmark(book.id);
     } else {
@@ -387,54 +190,6 @@ const BookReadingPage: React.FC = () => {
         description: book.description || undefined
       });
     }
-  };
-
-  if (loading) {
-    return (
-      <div className="min-h-screen p-6 md:p-10">
-        <div className="max-w-4xl mx-auto">
-          <div className="animate-pulse">
-            <div className="h-8 bg-[#3a2819] rounded w-1/4 mb-6"></div>
-            <div className="h-32 bg-[#3a2819] rounded mb-6"></div>
-            <div className="space-y-4">
-              {[1, 2, 3].map((n) => (
-                <div key={n} className="h-4 bg-[#3a2819] rounded"></div>
-              ))}
-            </div>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
-  if (error || !book) {
-    return (
-      <div className="min-h-screen flex flex-col items-center justify-center p-4 text-center">
-        <h1 className="text-2xl font-bold mb-4">Book not found</h1>
-        <p className="text-gray-400 mb-6">{error || 'Unable to load the book'}</p>
-        <div className="flex flex-col gap-4">
-          <button
-            onClick={() => navigate('/book-summaries')}
-            className="px-4 py-2 bg-[#c9a52c] text-black rounded-lg hover:bg-[#e6b93d] transition-colors"
-          >
-            Return to Book Summaries
-          </button>
-          <a
-            href="/book-debug"
-            className="px-4 py-2 bg-[#2d1e14] text-white rounded-lg hover:bg-[#3a2819] transition-colors"
-          >
-            Go to Book Debug Page
-          </a>
-        </div>
-      </div>
-    );
-  }
-
-  const content = book.content || {
-    summary: 'Summary not available',
-    keyPoints: [],
-    chapters: [],
-    quotes: []
   };
 
   // Get font size class
@@ -453,6 +208,8 @@ const BookReadingPage: React.FC = () => {
     setIsAddingNote(false);
     alert('Note saved successfully!');
   };
+
+  const content = book.content;
 
   return (
     <div className={`min-h-screen ${theme === 'light' ? 'bg-gray-100 text-gray-900' : 'bg-[#1a1310] text-white'}`}>
@@ -705,4 +462,4 @@ const BookReadingPage: React.FC = () => {
   );
 };
 
-export default BookReadingPage;
+export default BookReadingPageNew;

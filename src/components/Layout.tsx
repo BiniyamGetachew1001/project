@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { Book, Bookmark, CreditCard, Download, House, LayoutGrid, Menu, Moon, Settings, User, X, FileText, Plus } from 'lucide-react';
+import { Book, Bookmark, CreditCard, Download, House, LayoutGrid, Menu, Moon, Settings, User, X, FileText } from 'lucide-react';
 import SearchBar from './SearchBar';
 import { useBookmarks } from '../contexts/BookmarkContext';
 import Footer from './Footer';
@@ -111,10 +111,6 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
           <Link to="/settings" className={`sidebar-item ${isActive('/settings') ? 'active' : ''}`}>
             <Settings size={20} />
             <span>Settings</span>
-          </Link>
-          <Link to="/content-management" className={`sidebar-item ${isActive('/content-management') ? 'active' : ''}`}>
-            <Plus size={20} />
-            <span>Add Content</span>
           </Link>
         </nav>
 

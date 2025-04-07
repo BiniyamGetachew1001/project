@@ -5,6 +5,130 @@ import { getBooks } from '../lib/database';
 import { useBookmarks } from '../contexts/BookmarkContext';
 import type { Book } from '../types/database';
 
+// Mock books data for demonstration
+const mockBooks: Book[] = [
+  {
+    id: 'book-1',
+    title: 'The Lean Startup',
+    author: 'Eric Ries',
+    category: 'Business',
+    is_premium: false,
+    description: 'How Today\'s Entrepreneurs Use Continuous Innovation to Create Radically Successful Businesses',
+    read_time: '15 min',
+    cover_image: 'https://m.media-amazon.com/images/I/51T-sMqSMiL._SY291_BO1,204,203,200_QL40_FMwebp_.jpg',
+    content: {
+      summary: 'The Lean Startup provides a scientific approach to creating and managing startups and getting a desired product to customers\' hands faster. The Lean Startup method teaches you how to drive a startup—how to steer, when to turn, and when to persevere—and grow a business with maximum acceleration.',
+      keyPoints: [
+        'Build-Measure-Learn feedback loop is the core of the Lean Startup methodology',
+        'Validated learning is the process of demonstrating empirically that a team has discovered valuable truths about a startup\'s present and future business prospects',
+        'Minimum Viable Product (MVP) helps entrepreneurs start the process of learning as quickly as possible',
+        'Innovation accounting allows startups to objectively prove they are learning how to grow a sustainable business'
+      ],
+      chapters: [
+        {
+          title: 'Chapter 1: Start',
+          content: 'The Lean Startup method is based on lean manufacturing principles, agile development methodologies, and the scientific method. It aims to eliminate waste and increase value-creating practices during the product development phase.'
+        },
+        {
+          title: 'Chapter 2: Define',
+          content: 'A startup is a human institution designed to create a new product or service under conditions of extreme uncertainty. The goal of a startup is to figure out the right thing to build—the thing customers want and will pay for—as quickly as possible.'
+        },
+        {
+          title: 'Chapter 3: Learn',
+          content: 'The fundamental activity of a startup is to turn ideas into products, measure how customers respond, and then learn whether to pivot or persevere. All successful startup processes should be geared to accelerate that feedback loop.'
+        }
+      ],
+      quotes: [
+        'The only way to win is to learn faster than anyone else.',
+        'Success is not delivering a feature; success is learning how to solve the customer\'s problem.',
+        'As you consider building your own minimum viable product, let this simple rule suffice: remove any feature, process, or effort that does not contribute directly to the learning you seek.'
+      ]
+    },
+    created_at: new Date().toISOString(),
+    updated_at: new Date().toISOString()
+  },
+  {
+    id: 'book-2',
+    title: 'Atomic Habits',
+    author: 'James Clear',
+    category: 'Self-Help',
+    is_premium: false,
+    description: 'An Easy & Proven Way to Build Good Habits & Break Bad Ones',
+    read_time: '12 min',
+    cover_image: 'https://m.media-amazon.com/images/I/51-nXsSRfZL._SY291_BO1,204,203,200_QL40_FMwebp_.jpg',
+    content: {
+      summary: 'Atomic Habits offers a proven framework for improving every day. James Clear reveals practical strategies that will teach you exactly how to form good habits, break bad ones, and master the tiny behaviors that lead to remarkable results.',
+      keyPoints: [
+        'Small habits make a big difference over time',
+        'Focus on your identity, not just your goals',
+        'The four laws of behavior change: make it obvious, make it attractive, make it easy, make it satisfying',
+        'Environment design is more important than motivation'
+      ],
+      chapters: [
+        {
+          title: 'Chapter 1: The Surprising Power of Atomic Habits',
+          content: 'Habits are the compound interest of self-improvement. Getting 1 percent better every day counts for a lot in the long-run. Small changes often appear to make no difference until you cross a critical threshold.'
+        },
+        {
+          title: 'Chapter 2: How Your Habits Shape Your Identity',
+          content: 'The most effective way to change your habits is to focus not on what you want to achieve, but on who you wish to become. Your identity emerges out of your habits.'
+        },
+        {
+          title: 'Chapter 3: How to Build Better Habits',
+          content: 'The process of building a habit can be divided into four simple steps: cue, craving, response, and reward. Understanding these steps is the key to understanding how habits work.'
+        }
+      ],
+      quotes: [
+        'You do not rise to the level of your goals. You fall to the level of your systems.',
+        'Every action you take is a vote for the type of person you wish to become.',
+        'Habits are the compound interest of self-improvement.'
+      ]
+    },
+    created_at: new Date().toISOString(),
+    updated_at: new Date().toISOString()
+  },
+  {
+    id: 'book-3',
+    title: 'Zero to One',
+    author: 'Peter Thiel',
+    category: 'Business',
+    is_premium: false,
+    description: 'Notes on Startups, or How to Build the Future',
+    read_time: '10 min',
+    cover_image: 'https://m.media-amazon.com/images/I/41puRJbtwkL._SY291_BO1,204,203,200_QL40_FMwebp_.jpg',
+    content: {
+      summary: 'Zero to One presents at once an optimistic view of the future of progress in America and a new way of thinking about innovation: it starts by learning to ask the questions that lead you to find value in unexpected places.',
+      keyPoints: [
+        'Creating something new is going from 0 to 1, while copying things that work is going from 1 to n',
+        'The most valuable businesses solve unique problems',
+        'Competition is overrated; monopolies drive progress',
+        'Successful people find value in unexpected places'
+      ],
+      chapters: [
+        {
+          title: 'Chapter 1: The Challenge of the Future',
+          content: 'Progress can take two forms: horizontal progress (copying things that work) or vertical progress (doing new things). Horizontal progress is easy but vertical progress is difficult.'
+        },
+        {
+          title: 'Chapter 2: Party Like It\'s 1999',
+          content: 'The dot-com crash taught entrepreneurs the wrong lessons. Instead of learning to be bold and have vision, they learned to be unoriginal and incremental.'
+        },
+        {
+          title: 'Chapter 3: All Happy Companies Are Different',
+          content: 'Monopolies drive progress because they can think long-term and invest in innovation. Competition, on the other hand, leads to commoditization and lack of profits.'
+        }
+      ],
+      quotes: [
+        'What important truth do very few people agree with you on?',
+        'The most contrarian thing of all is not to oppose the crowd but to think for yourself.',
+        'Monopoly is the condition of every successful business.'
+      ]
+    },
+    created_at: new Date().toISOString(),
+    updated_at: new Date().toISOString()
+  }
+];
+
 const BookSummariesPage: React.FC = () => {
   const [books, setBooks] = useState<Book[]>([]);
   const [loading, setLoading] = useState(true);
@@ -16,9 +140,29 @@ const BookSummariesPage: React.FC = () => {
   useEffect(() => {
     const fetchBooks = async () => {
       try {
-        const data = await getBooks();
-        setBooks(data);
+        console.log('BookSummariesPage - Starting to fetch books...');
+        // Try to fetch books from the database
+        try {
+          console.log('Attempting to fetch books from database...');
+          const data = await getBooks();
+          console.log('Database response:', data);
+          if (data && data.length > 0) {
+            console.log('Using books from database:', data.length, 'books found');
+            setBooks(data);
+            return;
+          } else {
+            console.log('No books found in database');
+          }
+        } catch (dbError) {
+          console.warn('Error fetching books from database:', dbError);
+          console.error('Error details:', JSON.stringify(dbError, null, 2));
+        }
+
+        // If database fetch fails or returns no books, use mock data
+        console.log('Using mock books data:', mockBooks.length, 'mock books available');
+        setBooks(mockBooks);
       } catch (err) {
+        console.error('Unexpected error in fetchBooks:', err);
         setError(err instanceof Error ? err.message : 'Failed to fetch books');
       } finally {
         setLoading(false);
@@ -192,7 +336,7 @@ const BookSummariesPage: React.FC = () => {
                     });
                   }
                 }}
-                className="absolute top-4 right-4 bg-[#2d1e14] p-2 rounded-full hover:bg-[#3a2819] transition-colors z-10"
+                className="absolute top-4 left-4 bg-[#2d1e14] p-2 rounded-full hover:bg-[#3a2819] transition-colors z-10"
                 aria-label={isBookmarked(book.id) ? "Remove from bookmarks" : "Add to bookmarks"}
               >
                 {isBookmarked(book.id) ? (
