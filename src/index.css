@@ -106,6 +106,22 @@ body {
 
 .reading-content {
   @apply text-lg text-gray-200 leading-relaxed;
+  /* Ensure scrollbar is visible if needed, or style it */
+  scrollbar-width: thin; /* Firefox */
+  scrollbar-color: #4a2e1c #2d1e14; /* Firefox */
+}
+/* Webkit (Chrome, Safari) scrollbar styles */
+.reading-content::-webkit-scrollbar {
+  width: 8px;
+}
+.reading-content::-webkit-scrollbar-track {
+  background: #2d1e14;
+  border-radius: 4px;
+}
+.reading-content::-webkit-scrollbar-thumb {
+  background-color: #4a2e1c;
+  border-radius: 4px;
+  border: 2px solid #2d1e14;
 }
 
 .reading-content p {
@@ -133,15 +149,15 @@ body {
 }
 
 .font-size-small {
-  @apply text-base;
+  @apply text-sm md:text-base; /* Adjusted sizes */
 }
 
 .font-size-medium {
-  @apply text-lg;
+  @apply text-base md:text-lg; /* Adjusted sizes */
 }
 
 .font-size-large {
-  @apply text-xl;
+  @apply text-lg md:text-xl; /* Adjusted sizes */
 }
 
 .chapter-nav {
@@ -161,13 +177,27 @@ body {
 }
 
 .toolbar-button {
-  @apply p-2 rounded-full hover:bg-[#3a2819] transition-colors;
+  @apply p-2 rounded-full transition-colors duration-150; /* Base style */
 }
 
+.toolbar-button:hover {
+   @apply bg-[#3a2819] text-[#c9a52c]; /* Hover state */
+}
+
+/* Style for active/selected state if needed, e.g., for bookmark */
 .toolbar-button.active {
-  @apply bg-[#3a2819] text-[#c9a52c];
+   @apply text-[#c9a52c];
 }
 
 .chapter-header {
   @apply bg-[#3a2819] p-6 mb-8 rounded-xl;
+}
+
+/* Hide scrollbar utility */
+.hide-scrollbar::-webkit-scrollbar {
+  display: none; /* Safari and Chrome */
+}
+.hide-scrollbar {
+  -ms-overflow-style: none;  /* IE and Edge */
+  scrollbar-width: none;  /* Firefox */
 }

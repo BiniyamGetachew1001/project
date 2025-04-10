@@ -12,7 +12,7 @@ import AccountPage from './pages/AccountPage';
 import OfflineLibraryPage from './pages/OfflineLibraryPage';
 import BlogPage from './pages/BlogPage';
 import BlogPostPage from './pages/BlogPostPage';
-import BookReadingPage from './pages/BookReadingPage';
+import ImprovedBookReadingPage from './pages/ImprovedBookReadingPage';
 import BusinessPlanReadingPage from './pages/BusinessPlanReadingPage';
 import DatabaseTest from './components/DatabaseTest';
 import { BookmarkProvider } from './contexts/BookmarkContext';
@@ -46,11 +46,11 @@ const App = () => {
             <Route path="/account" element={<AccountPage />} />
             <Route path="/offline-library" element={<OfflineLibraryPage />} />
             <Route path="/test-db" element={<DatabaseTest />} />
-            <Route path="/books/:id" element={<BookReadingPage />} />
+            <Route path="/books/:id" element={<ImprovedBookReadingPage />} />
             <Route path="/business-plans/:id" element={<BusinessPlanReadingPage />} />
           </Route>
           {/* Book Reading Page without Layout */}
-          <Route path="/book-reading/:id" element={<BookReadingPage />} />
+          <Route path="/book-reading/:id" element={<ImprovedBookReadingPage />} />
         </Routes>
       </BookmarkProvider>
     </Router>

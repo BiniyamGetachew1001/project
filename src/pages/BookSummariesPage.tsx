@@ -11,7 +11,7 @@ const BookSummariesPage: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
-  const { isBookmarked } = useBookmarks();
+  const { isBookmarked } = useBookmarks(); // Keep if needed for bookmark status on cards
 
   useEffect(() => {
     const fetchBooks = async () => {
@@ -30,23 +30,24 @@ const BookSummariesPage: React.FC = () => {
 
   const categories = ['all', ...new Set(books.map(book => book.category))];
 
-  // Sort books to show free books first
-  const sortedBooks = [...books].sort((a, b) => {
-    if (a.is_premium === b.is_premium) return 0;
-    return a.is_premium ? 1 : -1;
-  });
+  // Remove sorting logic based on is_premium
+  // const sortedBooks = [...books].sort((a, b) => {
+  //   if (a.is_premium === b.is_premium) return 0;
+  //   return a.is_premium ? 1 : -1;
+  // });
 
-  const filteredBooks = sortedBooks.filter(book => {
+  const filteredBooks = books.filter(book => { // Use original books array
     const matchesSearch = book.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
       book.description?.toLowerCase().includes(searchQuery.toLowerCase());
     const matchesCategory = selectedCategory === 'all' || book.category === selectedCategory;
     return matchesSearch && matchesCategory;
   });
 
-  // Function to determine if a book should be free (first 3 non-premium books)
-  const isBookFree = (index: number) => index < 3;
+  // Remove isBookFree function
+  // const isBookFree = (index: number) => index < 3;
 
   if (loading) {
+    // ... existing loading state ...
     return (
       <div className="p-6 md:p-10">
         <div className="max-w-6xl mx-auto">
@@ -64,6 +65,7 @@ const BookSummariesPage: React.FC = () => {
   }
 
   if (error) {
+    // ... existing error state ...
     return (
       <div className="p-6 md:p-10">
         <div className="max-w-6xl mx-auto">
@@ -88,9 +90,10 @@ const BookSummariesPage: React.FC = () => {
               <span className="text-[#c9a52c]"> First 3 books are free!</span>
             </p>
           </div>
-          
+
           {/* Search Bar */}
           <div className="relative flex-shrink-0 w-full md:w-64">
+            {/* ... existing search input ... */}
             <input
               type="text"
               placeholder="Search books..."
@@ -104,6 +107,7 @@ const BookSummariesPage: React.FC = () => {
 
         {/* Category Filter */}
         <div className="flex gap-2 overflow-x-auto pb-4 mb-6">
+          {/* ... existing category buttons ... */}
           {categories.map((category) => (
             <button
               key={category}
@@ -121,66 +125,75 @@ const BookSummariesPage: React.FC = () => {
 
         {/* Books Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {filteredBooks.map((book, index) => (
-            <Link 
-              key={book.id} 
-              to={isBookFree(index) ? `/books/${book.id}` : '/pricing'}
-              className="block group"
-            >
-              <div className="bg-[#2d1e14] rounded-xl p-4 transition-transform hover:scale-[1.02]">
-                {/* Card Image */}
-                <div className="relative aspect-[3/2] overflow-hidden rounded-lg mb-4">
-                  {book.cover_image ? (
-                    <img
-                      src={book.cover_image}
-                      alt={book.title}
-                      className="w-full h-full object-cover"
-                    />
-                  ) : (
-                    <div className="w-full h-full bg-[#3a2819] flex items-center justify-center">
-                      <Filter size={32} className="text-gray-600" />
-                    </div>
-                  )}
-                  {!isBookFree(index) && (
-                    <div className="absolute inset-0 bg-black/60 flex items-center justify-center">
-                      <div className="text-center">
-                        <Lock size={24} className="mx-auto mb-2 text-[#c9a52c]" />
-                        <span className="text-[#c9a52c] font-medium">Premium</span>
+          {filteredBooks.map((book, index) => {
+            const isFree = index < 3; // Determine freeness based on index in the filtered list
+            return (
+              <Link
+                key={book.id}
+                // Link to book detail if free, otherwise to pricing
+                to={isFree ? `/books/${book.id}` : '/pricing'}
+                className="block group"
+              >
+                <div className="bg-[#2d1e14] rounded-xl p-4 transition-transform hover:scale-[1.02]">
+                  {/* Card Image */}
+                  <div className="relative aspect-[3/2] overflow-hidden rounded-lg mb-4">
+                    {/* ... existing image rendering ... */}
+                    {book.cover_image ? (
+                      <img
+                        src={book.cover_image}
+                        alt={book.title}
+                        className="w-full h-full object-cover"
+                      />
+                    ) : (
+                      <div className="w-full h-full bg-[#3a2819] flex items-center justify-center">
+                        <Filter size={32} className="text-gray-600" />
                       </div>
-                    </div>
-                  )}
-                  {isBookFree(index) && (
-                    <div className="absolute top-2 right-2 bg-green-500/90 text-white px-2 py-1 rounded text-sm font-medium">
-                      Free
-                    </div>
-                  )}
-                </div>
+                    )}
+                    {/* Show lock overlay only if NOT free */}
+                    {!isFree && (
+                      <div className="absolute inset-0 bg-black/60 flex items-center justify-center">
+                        <div className="text-center">
+                          <Lock size={24} className="mx-auto mb-2 text-[#c9a52c]" />
+                          <span className="text-[#c9a52c] font-medium">Premium</span>
+                        </div>
+                      </div>
+                    )}
+                    {/* Show "Free" badge only if free */}
+                    {isFree && (
+                      <div className="absolute top-2 right-2 bg-green-500/90 text-white px-2 py-1 rounded text-sm font-medium">
+                        Free
+                      </div>
+                    )}
+                  </div>
 
-                {/* Card Content */}
-                <div>
-                  <h3 className="font-bold mb-2 group-hover:text-[#c9a52c] transition-colors">
-                    {book.title}
-                  </h3>
-                  <p className="text-sm text-gray-400 line-clamp-2 mb-4">
-                    {book.description}
-                  </p>
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm bg-[#3a2819] text-[#c9a52c] py-1 px-2 rounded">
-                      {book.category}
-                    </span>
-                    <div className="flex items-center gap-1 text-sm text-[#c9a52c]">
-                      <Clock size={14} />
-                      <span>{book.read_time}</span>
+                  {/* Card Content */}
+                  <div>
+                    {/* ... existing card content ... */}
+                    <h3 className="font-bold mb-2 group-hover:text-[#c9a52c] transition-colors">
+                      {book.title}
+                    </h3>
+                    <p className="text-sm text-gray-400 line-clamp-2 mb-4">
+                      {book.description}
+                    </p>
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm bg-[#3a2819] text-[#c9a52c] py-1 px-2 rounded">
+                        {book.category}
+                      </span>
+                      <div className="flex items-center gap-1 text-sm text-[#c9a52c]">
+                        <Clock size={14} />
+                        <span>{book.read_time}</span>
+                      </div>
                     </div>
                   </div>
                 </div>
-              </div>
-            </Link>
-          ))}
+              </Link>
+            );
+          })}
         </div>
 
         {/* No Results */}
         {filteredBooks.length === 0 && (
+          // ... existing no results message ...
           <div className="text-center py-12">
             <p className="text-gray-400">No books found matching your criteria.</p>
           </div>
