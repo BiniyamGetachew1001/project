@@ -77,13 +77,17 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
             <Book size={20} />
             <span>Book Summaries</span>
           </Link>
-          <Link to="/business-plans" className={`sidebar-item ${isActive('/business-plans') ? 'active' : ''}`}>
-            <LayoutGrid size={20} />
-            <span>Business Plans</span>
-          </Link>
           <Link to="/blog" className={`sidebar-item ${isActive('/blog') ? 'active' : ''}`}>
             <FileText size={20} />
             <span>Blog</span>
+          </Link>
+          <Link to="/book-purchase" className={`sidebar-item ${isActive('/book-purchase') ? 'active' : ''}`}>
+            <Book size={20} />
+            <span>Book Purchase</span>
+          </Link>
+          <Link to="/business-plans" className={`sidebar-item ${isActive('/business-plans') ? 'active' : ''}`}>
+            <LayoutGrid size={20} />
+            <span>Business Plans</span>
           </Link>
           <Link to="/bookmarks" className={`sidebar-item ${isActive('/bookmarks') ? 'active' : ''}`}>
             <Bookmark size={20} />
