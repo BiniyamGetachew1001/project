@@ -14,6 +14,7 @@ import BlogPage from './pages/BlogPage';
 import BlogPostPage from './pages/BlogPostPage';
 import ImprovedBookReadingPage from './pages/ImprovedBookReadingPage';
 import BusinessPlanReadingPage from './pages/BusinessPlanReadingPage';
+import AdminPanel from './pages/AdminPanel';
 import DatabaseTest from './components/DatabaseTest';
 import BookPurchase from './pages/BookPurchase';
 import { BookmarkProvider } from './contexts/BookmarkContext';
@@ -53,6 +54,8 @@ const App = () => {
           {/* Book Reading Page without Layout */}
           <Route path="/book-reading/:id" element={<ImprovedBookReadingPage />} />
           <Route path="/book-purchase" element={<BookPurchase />} />
+          {/* Admin Panel */}
+          <Route path="/admin/*" element={<AdminPanel />} />
         </Routes>
       </BookmarkProvider>
     </Router>
